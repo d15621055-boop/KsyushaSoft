@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#fdf6f0">
+    <title>С любовью для Ксюши</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        html{scroll-behavior:smooth}
+        body{
+            font-family:'Georgia','Times New Roman',serif;
+            background:#fdf6f0;
+            color:#4a3728;
+            min-height:100vh;
+            overflow-x:hidden;
+        }
+
+        /* ===== PETALS ===== */
+        .petals{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:hidden}
+        .petal{position:absolute;top:-30px;opacity:0;animation:petalFall linear forwards}
+        @keyframes petalFall{
+            0%{transform:translateY(0) rotate(0deg) translateX(0);opacity:0}
+            10%{opacity:.6}
+            50%{transform:translateY(50vh) rotate(180deg) translateX(40px)}
+            90%{opacity:.6}
+            100%{transform:translateY(110vh) rotate(360deg) translateX(-20px);opacity:0}
+        }
+
+        /* ===== PAGES ===== */
+        .page{display:none;min-height:100vh;padding-bottom:100px;animation:softIn .8s ease}
+        .page.active{display:block}
+        @keyframes softIn{from{opacity:0}to{opacity:1}}
+
+        /* ===== HOME ===== */
+        .home-hero{
+            height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+            text-align:center;padding:30px;position:relative;
+            background:linear-gradient(180deg,#fdf6f0 0%,#fce4ec 50%,#f8bbd0 100%);
+        }
+        .home-hero::after{
+            content:'';position:absolute;bottom:0;left:0;width:100%;height:200px;
+            background:linear-gradient(transparent,#fdf6f0);
+        }
+        .hero-emoji{font-size:90px;margin-bottom:20px;display:block;animation:gentleBounce 3s ease-in-out infinite}
+        @keyframes gentleBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+        .hero-name{
+            font-size:48px;font-weight:400;letter-spacing:2px;margin-bottom:12px;
+            color:#c2185b;
+        }
+        .hero-sub{font-size:17px;color:#8d6e63;line-height:1.8;max-width:320px;font-style:italic}
+        .scroll-arrow{
+            position:absolute;bottom:50px;left:50%;transform:translateX(-50%);z-index:1;
+            width:30px;height:30px;border-right:2px solid #c2185b;border-bottom:2px solid #c2185b;
+            transform:translateX(-50%) rotate(45deg);opacity:.4;animation:arrowPulse 2s ease-in-out infinite;
+        }
+        @keyframes arrowPulse{0%,100%{opacity:.4}50%{opacity:.8}}
+
+        /* ===== TIMER ===== */
+        .timer-wrap{
+            padding:50px 20px;text-align:center;
+        }
+        .timer-label{
+            font-size:13px;text-transform:uppercase;letter-spacing:4px;color:#c2185b;
+            margin-bottom:24px;font-family:sans-serif;
+        }
+        .timer-row{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;max-width:420px;margin:0 auto}
+        .timer-item{
+            background:#fff;border-radius:20px;padding:24px 18px;min-width:80px;
+            box-shadow:0 4px 24px rgba(194,24,91,.08);border:1px solid rgba(194,24,91,.06);
+        }
+        .timer-num{font-size:44px;font-weight:400;color:#c2185b;line-height:1}
+        .timer-unit{font-size:11px;color:#bcaaa4;text-transform:uppercase;letter-spacing:2px;margin-top:8px;font-family:sans-serif}
+
+        /* ===== DIVIDER ===== */
+        .divider{text-align:center;padding:10px 0}
+        .divider span{display:inline-block;width:6px;height:6px;background:#f8bbd0;border-radius:50%;margin:0 8px}
+
+        /* ===== SLIDESHOW ===== */
+        .gallery-wrap{padding:40px 20px}
+        .gallery-title{
+            text-align:center;font-size:28px;font-weight:400;color:#c2185b;
+            margin-bottom:30px;font-style:italic;
+        }
+        .slider{
+            max-width:380px;margin:0 auto;position:relative;border-radius:28px;overflow:hidden;
+            box-shadow:0 8px 40px rgba(0,0,0,.1);aspect-ratio:1;background:#fce4ec;
+        }
+        .slider .slide{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;transition:opacity 1s ease}
+        .slider .slide.on{opacity:1}
+        .slider img{width:100%;height:100%;object-fit:cover}
+        .slider-nav{display:flex;justify-content:center;gap:12px;margin-top:20px}
+        .slider-dot{width:8px;height:8px;border-radius:50%;background:#f8bbd0;transition:all .4s}
+        .slider-dot.on{background:#c2185b;width:24px;border-radius:4px}
+        .slider-cap{text-align:center;margin-top:16px;font-style:italic;color:#8d6e63;font-size:15px}
+        .play-btn{
+            display:block;margin:24px auto 0;padding:12px 32px;background:#fff;border:1px solid #f8bbd0;
+            border-radius:40px;color:#c2185b;font-size:14px;cursor:pointer;font-family:sans-serif;
+            transition:all .3s;box-shadow:0 2px 12px rgba(194,24,91,.06);
+        }
+        .play-btn.on{background:#fce4ec;border-color:#c2185b}
+
+        /* ===== GRID ===== */
+        .photo-grid{
+            display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:380px;margin:30px auto 0;padding:0 20px;
+        }
+        .photo-grid .cell{
+            border-radius:20px;overflow:hidden;aspect-ratio:1;cursor:pointer;
+            box-shadow:0 4px 20px rgba(0,0,0,.06);transition:transform .3s;
+        }
+        .photo-grid .cell:active{transform:scale(.96)}
+        .photo-grid img{width:100%;height:100%;object-fit:cover}
+
+        /* ===== LETTER ===== */
+        .letter-wrap{padding:50px 20px}
+        .letter-box{
+            max-width:400px;margin:0 auto;background:#fff;border-radius:32px;padding:44px 32px;
+            box-shadow:0 8px 48px rgba(194,24,91,.06);border:1px solid rgba(194,24,91,.05);
+            position:relative;overflow:hidden;
+        }
+        .letter-box::before{
+            content:'';position:absolute;top:-50%;right:-50%;width:100%;height:100%;
+            background:radial-gradient(circle,rgba(248,187,208,.15),transparent 70%);pointer-events:none;
+        }
+        .letter-box h2{font-size:22px;color:#c2185b;text-align:center;margin-bottom:24px;font-weight:400}
+        .letter-box p{font-size:16px;line-height:2;color:#8d6e63;text-align:center;margin-bottom:16px}
+        .letter-box .sign{
+            text-align:center;margin-top:32px;font-size:16px;color:#c2185b;font-style:italic;
+        }
+
+        /* ===== MUSIC ===== */
+        .music-btn{
+            position:fixed;top:60px;right:16px;width:46px;height:46px;border-radius:50%;
+            background:#fff;border:1px solid #f8bbd0;display:flex;align-items:center;justify-content:center;
+            font-size:20px;cursor:pointer;z-index:200;box-shadow:0 2px 16px rgba(194,24,91,.08);
+            transition:all .3s;
+        }
+        .music-btn.on{animation:glow 1.5s ease-in-out infinite}
+        @keyframes glow{0%,100%{box-shadow:0 2px 16px rgba(194,24,91,.08)}50%{box-shadow:0 2px 24px rgba(194,24,91,.25)}}
+
+        /* ===== NAV ===== */
+        .bottom-bar{
+            position:fixed;bottom:0;left:0;width:100%;background:rgba(253,246,240,.92);
+            backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+            border-top:1px solid rgba(194,24,91,.06);padding:8px 0;
+            padding-bottom:env(safe-area-inset-bottom,8px);z-index:100;
+        }
+        .bottom-bar ul{display:flex;justify-content:space-around;list-style:none}
+        .bottom-bar li{
+            display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;
+            opacity:.35;transition:all .3s;
+        }
+        .bottom-bar li.on{opacity:1}
+        .bottom-bar li .i{font-size:20px}
+        .bottom-bar li .t{font-size:10px;color:#bcaaa4;font-family:sans-serif;letter-spacing:1px}
+        .bottom-bar li.on .t{color:#c2185b}
+
+        /* ===== LIGHTBOX ===== */
+        .lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1000;align-items:center;justify-content:center;flex-direction:column}
+        .lb.open{display:flex}
+        .lb img{max-width:92%;max-height:72vh;border-radius:16px}
+        .lb .x{position:absolute;top:60px;right:20px;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;cursor:pointer}
+        .lb .cap{margin-top:16px;font-size:15px;color:rgba(255,255,255,.6);font-style:italic}
+    </style>
+</head>
+<body>
+
+<div class="petals" id="petals"></div>
+<div class="music-btn" id="mbtn" onclick="toggleMusic()">🔇</div>
+<audio id="mus" loop preload="auto">
+    <source src="https://cdn.pixabay.com/audio/2024/11/28/audio_89eb033834.mp3" type="audio/mpeg">
+</audio>
+
+<!-- HOME -->
+<div id="pg-home" class="page active">
+    <div class="home-hero">
+        <span class="hero-emoji">🌸</span>
+        <div class="hero-name">Ксюша</div>
+        <p class="hero-sub">Ты — мой самый нежный и красивый день. Это приложение создано с любовью для тебя</p>
+        <div class="scroll-arrow"></div>
+    </div>
+
+    <div class="timer-wrap">
+        <div class="timer-label">Мы вместе уже</div>
+        <div class="timer-row">
+            <div class="timer-item"><div class="timer-num" id="d">0</div><div class="timer-unit">дней</div></div>
+            <div class="timer-item"><div class="timer-num" id="h">0</div><div class="timer-unit">часов</div></div>
+            <div class="timer-item"><div class="timer-num" id="m">0</div><div class="timer-unit">минут</div></div>
+            <div class="timer-item"><div class="timer-num" id="s">0</div><div class="timer-unit">секунд</div></div>
+        </div>
+    </div>
+
+    <div class="divider"><span></span><span></span><span></span></div>
+
+    <div class="letter-wrap">
+        <div class="letter-box">
+            <h2>Моя любимая Ксюша 🌷</h2>
+            <p>Ксюш, я знаю, что ты можешь уставать и что-то может идти не так. Но я хочу, чтобы ты помнила: у тебя есть я. Всегда.</p>
+            <p>Ты не одна, слышишь? Я готов слушать тебя, обнимать, молчать рядом или говорить глупости, чтобы ты улыбнулась.</p>
+            <p>Ты — моя самая сильная и нежная девочка одновременно. Я рядом, моя хорошая.</p>
+            <p>Всё будет хорошо, потому что мы вместе. Крепко-крепко тебя обнимаю 💗</p>
+            <div class="sign">Твой навсегда ❤️</div>
+        </div>
+    </div>
+</div>
+
+<!-- GALLERY -->
+<div id="pg-gallery" class="page">
+    <div class="gallery-wrap" style="padding-top:60px">
+        <div class="gallery-title">Наши моменты</div>
+        <div class="slider" id="slider">
+            <div class="slide on"><img src="images/p1.jpg"></div>
+            <div class="slide"><img src="images/p2.jpg"></div>
+            <div class="slide"><img src="images/p3.jpg"></div>
+            <div class="slide"><img src="images/p4.jpg"></div>
+        </div>
+        <div class="slider-nav" id="snav"></div>
+        <div class="slider-cap" id="scap">Наш момент</div>
+        <button class="play-btn" id="apbtn" onclick="toggleAuto()">▶ Автоплей</button>
+    </div>
+    <div class="photo-grid">
+        <div class="cell" onclick="openLB(0)"><img src="images/p1.jpg"></div>
+        <div class="cell" onclick="openLB(1)"><img src="images/p2.jpg"></div>
+        <div class="cell" onclick="openLB(2)"><img src="images/p3.jpg"></div>
+        <div class="cell" onclick="openLB(3)"><img src="images/p4.jpg"></div>
+    </div>
+</div>
+
+<!-- LETTER -->
+<div id="pg-letter" class="page">
+    <div class="letter-wrap" style="padding-top:60px">
+        <div class="gallery-title">Письмо для тебя 💌</div>
+        <div class="letter-box">
+            <h2>Для моей Ксюши 💝</h2>
+            <p>Ксюш, я знаю, что ты можешь уставать и что-то может идти не так. Но я хочу, чтобы ты помнила: у тебя есть я. Всегда.</p>
+            <p>Ты не одна, слышишь? Я готов слушать тебя, обнимать, молчать рядом или говорить глупости, чтобы ты улыбнулась.</p>
+            <p>Ты — моя самая сильная и нежная девочка одновременно. Я рядом, моя хорошая.</p>
+            <p>Всё будет хорошо, потому что мы вместе. Крепко-крепко тебя обнимаю</p>
+            <p style="font-size:22px;margin-top:20px;text-align:center">Я тебя люблю! 💗💕❤️</p>
+            <div class="sign">Навсегда твой 💋</div>
+        </div>
+    </div>
+</div>
+
+<!-- NAV -->
+<div class="bottom-bar">
+    <ul>
+        <li class="on" onclick="go('home')"><span class="i">🏡</span><span class="t">Домой</span></li>
+        <li onclick="go('gallery')"><span class="i">📷</span><span class="t">Фото</span></li>
+        <li onclick="go('letter')"><span class="i">💌</span><span class="t">Письмо</span></li>
+    </ul>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lb" id="lb">
+    <div class="x" onclick="closeLB()">✕</div>
+    <img id="lbi" src="">
+    <div class="cap" id="lbc"></div>
+</div>
+
+<script>
+    // NAV
+    function go(p){
+        document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
+        document.getElementById('pg-'+p).classList.add('active');
+        document.querySelectorAll('.bottom-bar li').forEach((l,i)=>{
+            l.classList.remove('on');
+            if(['home','gallery','letter'][i]===p) l.classList.add('on');
+        });
+        window.scrollTo(0,0);
+    }
+
+    // TIMER — March 11, 2026
+    const START=new Date('2026-03-11T00:00:00');
+    function tick(){
+        const now=new Date();
+        let diff=Math.floor((now-START)/1000);
+        const dd=Math.floor(diff/86400);diff%=86400;
+        const hh=Math.floor(diff/3600);diff%=3600;
+        const mm=Math.floor(diff/60);
+        const ss=diff%60;
+        document.getElementById('d').textContent=dd;
+        document.getElementById('h').textContent=hh;
+        document.getElementById('m').textContent=mm;
+        document.getElementById('s').textContent=ss;
+    }
+    tick();setInterval(tick,1000);
+
+    // PETALS
+    function petal(){
+        const c=document.getElementById('petals');
+        const p=document.createElement('div');
+        p.className='petal';
+        const emojis=['🌸','🌷','💮','🌺','🩷','🤍','💗'];
+        p.innerHTML=emojis[Math.floor(Math.random()*emojis.length)];
+        p.style.left=Math.random()*100+'%';
+        p.style.fontSize=(12+Math.random()*14)+'px';
+        p.style.animationDuration=(6+Math.random()*6)+'s';
+        p.style.animationDelay=Math.random()*3+'s';
+        c.appendChild(p);
+        setTimeout(()=>p.remove(),15000);
+    }
+    setInterval(petal,500);
+
+    // MUSIC
+    let musOn=false;
+    function toggleMusic(){
+        const a=document.getElementById('mus');
+        const b=document.getElementById('mbtn');
+        if(musOn){a.pause();b.textContent='🔇';b.classList.remove('on')}
+        else{a.play().catch(()=>{});b.textContent='🎵';b.classList.add('on')}
+        musOn=!musOn;
+    }
+
+    // SLIDESHOW
+    let cur=0;
+    const slides=document.querySelectorAll('.slider .slide');
+    const caps=['Наш момент','Счастье','Вместе','Навсегда'];
+    let autoInt=null;
+    function buildDots(){
+        const n=document.getElementById('snav');n.innerHTML='';
+        slides.forEach((_,i)=>{
+            const dot=document.createElement('div');
+            dot.className='slider-dot'+(i===cur?' on':'');
+            dot.onclick=()=>showSlide(i);
+            n.appendChild(dot);
+        });
+    }
+    function showSlide(n){
+        slides[cur].classList.remove('on');cur=n;slides[cur].classList.add('on');
+        document.getElementById('scap').textContent=caps[cur]||'';buildDots();
+    }
+    function nextSlide(){showSlide((cur+1)%slides.length)}
+    buildDots();
+    function toggleAuto(){
+        const b=document.getElementById('apbtn');
+        if(autoInt){clearInterval(autoInt);autoInt=null;b.classList.remove('on');b.textContent='▶ Автоплей'}
+        else{autoInt=setInterval(nextSlide,3500);b.classList.add('on');b.textContent='⏸ Пауза'}
+    }
+
+    // LIGHTBOX
+    const lbSrc=['images/p1.jpg','images/p2.jpg','images/p3.jpg','images/p4.jpg'];
+    const lbCap=['Наш момент','Счастье','Вместе','Навсегда'];
+    let lbI=0;
+    function openLB(i){lbI=i;document.getElementById('lbi').src=lbSrc[i];document.getElementById('lbc').textContent=lbCap[i];document.getElementById('lb').classList.add('open')}
+    function closeLB(){document.getElementById('lb').classList.remove('open')}
+    let tx=0;
+    document.getElementById('lb').addEventListener('touchstart',e=>{tx=e.touches[0].clientX});
+    document.getElementById('lb').addEventListener('touchend',e=>{
+        const df=tx-e.changedTouches[0].clientX;
+        if(Math.abs(df)>50){
+            if(df>0&&lbI<lbSrc.length-1)lbI++;
+            else if(df<0&&lbI>0)lbI--;
+            document.getElementById('lbi').src=lbSrc[lbI];
+            document.getElementById('lbc').textContent=lbCap[lbI];
+        }
+    });
+</script>
+</body>
+</html>
